@@ -1,0 +1,12 @@
+<ul>
+{% for path, path_fragment, name in crumbs %}
+	<li>
+	{% if not forloop.last %}
+		<a href="{{ path }}">{{ name }}</a> {{ crumb_delim|safe }}
+	{% endif %}
+	{% if forloop.last %}
+		{{ name }}
+	{% endif %}
+	</li>
+{% endfor %}
+</ul>

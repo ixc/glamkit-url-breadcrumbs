@@ -11,7 +11,7 @@ re_spacify = re.compile(r'[-_+]')
 log = logging.getLogger(__name__)
 
 
-@register.inclusion_tag('breadcrumbs.html', takes_context=True)
+@register.inclusion_tag('url_breadcrumbs.html', takes_context=True)
 def url_breadcrumbs(context, request):
     """
     Determine a breadcrumb trail based on the URL path of the current request.

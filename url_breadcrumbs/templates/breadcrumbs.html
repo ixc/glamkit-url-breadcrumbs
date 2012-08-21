@@ -1,12 +1,15 @@
-<ul>
+{% spaceless %}
+<ul class="url-breadcrumbs">
 {% for path, path_fragment, name in crumbs %}
-	<li>
+	<li class="crumb">
 	{% if not forloop.last %}
-		<a href="{{ path }}">{{ name }}</a> {{ crumb_delim|safe }}
+		<a href="{{ path }}">{{ name }}</a>
+		<span class="crumb-delim">{{ crumb_delim|safe }}</span>
 	{% endif %}
 	{% if forloop.last %}
-		{{ name }}
+		<span class="crumb-final">{{ name }}</span>
 	{% endif %}
 	</li>
 {% endfor %}
 </ul>
+{% endspaceless %}

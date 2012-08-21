@@ -1,14 +1,17 @@
 import re
+import logging
 
-from django import template, settings
+from django import template
+from django.conf import settings
 from django.template.defaultfilters import title
 
 register = template.Library()
 
 re_spacify = re.compile(r'[-_+]')
+log = logging.getLogger(__name__)
 
 
-@register.inclusion_tag('url_breadcrumbs/breadcrumbs.html', takes_context=True)
+@register.inclusion_tag('breadcrumbs.html', takes_context=True)
 def url_breadcrumbs(context, request):
     """
     Determine a breadcrumb trail based on the URL path of the current request.
@@ -28,6 +31,12 @@ def url_breadcrumbs(context, request):
 
     If the URL_BREADCRUMBS_FUNCTIONS Django setting is available, each callable
     item in this list will be invoked to see if it returns a crumb name.
+    The callable must accept four arguments:
+     - `context` : Django request context object
+     - `request` : Django request object
+     - `path_fragment` : Path fragment the callable will (re)name
+     - `is_current_page` : True if path fragment is for current page, i.e. the
+        last page in the breadcrumbs list.
     Note that these functions are not invoked if `request.crumb` or
     `request.crumbs` is set.
 
@@ -61,12 +70,27 @@ def url_breadcrumbs(context, request):
 
             # Check whether any callables in URL_BREADCRUMBS_FUNCTIONS give
             # us a crumb name
-            if hasattr(settings, 'URL_BREADCRUMBS_FUNCTIONS'):
+            try:
                 for fn in settings.URL_BREADCRUMBS_FUNCTIONS:
-                    crumb_name = fn(context, request,
-                                    path_fragment, is_current_page)
+                    crumb_name = None
+                    try:
+                        crumb_name = fn(context, request,
+                                        path_fragment, is_current_page)
+                    except:
+                        # Error in crumb name generation function
+                        log.warn("Crumb generation function %s failed"
+                                 % fn, exc_info=True)
                     if crumb_name is not None:
                         break  # Pay attention to any non-None return value
+            except AttributeError:
+                # URL_BREADCRUMBS_FUNCTIONS not in settings, ignore
+                pass
+            except TypeError:
+                # URL_BREADCRUMBS_FUNCTIONS in settings but not iterable
+                log.warn("URL_BREADCRUMBS_FUNCTIONS in settings is invalid,"
+                         " it cannot be iterated over. Should be a list of"
+                         " callables: %s" % settings.URL_BREADCRUMBS_FUNCTIONS,
+                         exc_info=True)
 
             # Fallback strategy is to reformat the slug component to title
             # case and hope this produces a human-friendly crumb name...

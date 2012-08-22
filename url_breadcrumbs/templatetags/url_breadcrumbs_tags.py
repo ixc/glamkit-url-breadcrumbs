@@ -19,32 +19,40 @@ def url_breadcrumbs(context, request):
     If no special attributes are set on request or in the context, each URL
     path slug component is automatically converted into title-cased text.
     If you're lucky enough to have a good URL path hierarchy this should be
-    enough in most cases.
+    enough in most cases. If not, see the customization options below.
 
-    Optional request attributes:
-     - Set `request.crumb` to a string value to override the name displayed for
-       the current page (i.e. the last crumb)
-     - Set `request.crumbs` to a dictionary that maps slug path components to
-       string names to override an arbitrary crumb in the crumb path.
-     - If the name of a crumb is set to None by either of these mechanisms,
+    Args:
+     - ``context`` (:class:`django.template.Context`): Django request context
+     - ``request`` (:class:`django.http.HttpRequest`): Django request
+
+    Customize crumbs by setting attributes on :class:`django.http.HttpRequest`
+    in your view:
+
+     - Set ``request.crumb`` to a string value to override the name displayed
+       for the current page (i.e. the last crumb)
+     - Set ``request.crumbs`` to a dictionary that maps slug path components
+       to string names to override an arbitrary crumb in the crumb path.
+     - If the name of a crumb is set to ``None`` by either of these mechanisms,
        that crumb will be skipped
 
-    If the URL_BREADCRUMBS_FUNCTIONS Django setting is available, each callable
-    item in this list will be invoked to see if it returns a crumb name.
-    The callable must accept four arguments:
-     - `context` : Django request context object
-     - `request` : Django request object
-     - `path_fragment` : Path fragment the callable will (re)name
-     - `is_current_page` : True if path fragment is for current page, i.e. the
-        last page in the breadcrumbs list.
-    Note that these functions are not invoked if `request.crumb` or
-    `request.crumbs` is set.
+    If ``URL_BREADCRUMBS_FUNCTIONS`` in Django :mod:`django.conf.settings`
+    is available, each callable item in this list will be invoked to see if
+    it returns a crumb name. The callables must accept four arguments:
 
-    Optional context attributes:
-     - `crumb_home_name` : override the name of the root Home crumb that is
+     - ``context`` (:class:`django.template.Context`): Django request context
+     - ``request`` (:class:`django.http.HttpRequest`): Django request
+     - ``path_fragment`` (unicode): Path fragment the callable will (re)name
+     - ``is_current_page`` (bool): True if path fragment is for current
+       page, i.e. the last page in the breadcrumbs list.
+
+    Note that these functions are not invoked if ``request.crumb`` or
+    ``request.crumbs`` is set.
+
+    Optional :class:`template context <django.template.Context>` attributes:
+     - ``crumb_home_name`` : override the name of the root Home crumb that is
        always present. Defaults to 'Home'.
-     - `crumb_delim` : override the delimiter character rendered between crumb
-       path components by the default template. Defaults to '&raquo;'.
+     - ``crumb_delim`` : override the delimiter character rendered between
+       crumb path components by the default template. Defaults to ``&raquo;``.
        Note that this value is assumed to be safe by the default template.
     """
     # Load optional context items
